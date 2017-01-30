@@ -57,7 +57,7 @@ def get_lyrics():
 
 	start_index = random.randint(0, len(text) - maxlen - 1)
 
-	for diversity in [0.1]:
+	for diversity in [0.15]:
 	    print()
 	    print('----- diversity:', diversity)
 
