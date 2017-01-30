@@ -23,8 +23,10 @@ def home():
 @app.route('/fire')
 def fire():
 
-	result = q.enqueue(
-             get_lyrics)
+	result = q.enqueue_call(func=get_lyrics, result_ttl=10)
+
+	# result = q.enqueue(
+ #             get_lyrics)
 
 	while not result.is_finished:
 		time.sleep(1)
