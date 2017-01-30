@@ -1,0 +1,99 @@
+<html>
+
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+	<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+	<title>raindrop//droptop</title>
+
+	<style type="text/css">
+
+		#main {
+			padding-top: 5%;
+			padding-bottom: 2%;
+		}
+
+		.header {
+			text-align: right;
+		}
+
+		h2, h5 {
+			font-family: 'Rubik', sans-serif;
+		}
+
+		#info {
+			padding-bottom: 2%;
+		}
+
+		#genbtn {
+			padding-bottom: 1%;
+		}
+
+	</style>
+
+</head>
+
+<body>
+
+<div class="container">
+	<div class="col-md-12" id="main"><h2>raindrop//droptop</h2></div>
+	<div class="col-md-12" id="info">
+		<h5>We trained a neural network with 20,000 lines of rap lyrics from the most popular songs of the past few years. These lyrics are completely generated on that content.</h5>
+		<br>
+		<button class="btn btn-md" id="genbtn" onclick="getLyrics();">Generate 🔥</button>
+
+	</div>
+	<hr>
+	<div class="col-md-12">
+		<div class="jumbotron" id="lyrics">
+			<!-- {{all_data}} -->
+		</div>
+	</div>
+</div>
+
+<!-- 	<div class="col-md-12">
+		<b>A reccurent neural network to generate rap lyrics. Because why tf not?</b>
+	</div> -->
+
+
+</body>
+
+<script type="text/javascript">
+
+var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+    }
+}
+
+function getLyrics() {
+
+	document.getElementById("lyrics").innerHTML = "<h5>Writing bars...</h5>";
+
+	var client = new HttpClient();
+
+	client.get('/fire', function(response) {
+
+	    lyricsArr = JSON.parse(response);
+	    lyrics = "<h5>";
+
+		for (var i = 0; i < lyricsArr.length; i++) {
+			lyrics += lyricsArr[i] + "<br />";
+		};
+
+		lyrics += "</h5>";
+
+		document.getElementById("lyrics").innerHTML = lyrics;
+
+	});
+
+}
+
+</script>
