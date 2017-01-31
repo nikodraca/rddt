@@ -29,6 +29,8 @@ def fire():
  #             get_lyrics)
 
 	while not result.is_finished:
+		result.refresh()
+		print(result.meta.get('progress'))
 		time.sleep(1)
 
 	print (result.result)

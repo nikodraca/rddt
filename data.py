@@ -4,6 +4,7 @@ from keras.layers import LSTM
 from keras.optimizers import RMSprop
 from keras.utils.data_utils import get_file
 from keras.models import load_model
+from rq import get_current_job
 import numpy as np
 import random
 import sys
@@ -43,6 +44,9 @@ def get_lyrics():
 	print('----- Generating with seed: "' + sentence + '"')
 	sys.stdout.write(generated)
 
+	job = get_current_job()
+
+
 	for i in range(400):
 			x = np.zeros((1, maxlen, len(chars)))
 			for t, char in enumerate(sentence):
@@ -54,6 +58,9 @@ def get_lyrics():
 
 			generated += next_char
 			sentence = sentence[1:] + next_char 
+
+			job.meta['progress'] = generated
+			job.save()
 
 	print()	
 
