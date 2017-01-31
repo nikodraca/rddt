@@ -4,6 +4,7 @@ from keras.layers import LSTM
 from keras.optimizers import RMSprop
 from keras.utils.data_utils import get_file
 from keras.models import load_model
+from rq import get_current_job
 import numpy as np
 import random
 import sys
@@ -11,6 +12,8 @@ import json
 import requests
 
 def get_lyrics():
+	if shouldCancel():
+		return ''
 	model = load_model('my_model.h5')
 	path = "txt/output_all.txt"
 	text = open(path).read().lower()
@@ -44,6 +47,8 @@ def get_lyrics():
 	sys.stdout.write(generated)
 
 	for i in range(400):
+			if shouldCancel():
+				return ''
 			x = np.zeros((1, maxlen, len(chars)))
 			for t, char in enumerate(sentence):
 					x[0, t, char_indices[char]] = 1.
@@ -55,6 +60,17 @@ def get_lyrics():
 			generated += next_char
 			sentence = sentence[1:] + next_char 
 
+			updateProgress(generated)
 	print()	
 
-	return json.dumps(generated.split("\n"))
+	return generated
+
+def updateProgress(progress):
+	job = get_current_job()
+	job.meta['progress'] = progress
+	job.save()
+
+def shouldCancel():
+	job = get_current_job()
+	job.refresh()
+	return job.meta.get('cancelled')

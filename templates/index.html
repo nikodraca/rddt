@@ -31,21 +31,21 @@
 
 <body>
 
-<div class="container">
-	<div class="col-md-12" id="main"><h2>raindrop//droptop</h2></div>
-	<div class="col-md-12" id="info">
-		<h5>We trained a neural network with 20,000 lines of rap lyrics from the most popular songs of the past few years. These lyrics are completely generated on that content.</h5>
-		<br>
-		<button class="btn btn-md" id="genbtn" onclick="getLyrics();">Generate 🔥</button>
+	<div class="container">
+		<div class="col-md-12" id="main"><h2>raindrop//droptop</h2></div>
+		<div class="col-md-12" id="info">
+			<h5>We trained a neural network with 20,000 lines of rap lyrics from the most popular songs of the past few years. These lyrics are completely generated on that content.</h5>
+			<br>
+			<button class="btn btn-md" id="genbtn" onclick="getLyrics();">Generate 🔥</button>
 
-	</div>
-	<hr>
-	<div class="col-md-12">
-		<div class="jumbotron" id="lyrics">
-			<!-- {{all_data}} -->
+		</div>
+		<hr>
+		<div class="col-md-12">
+			<div class="jumbotron" id="lyrics">
+				<!-- {{all_data}} -->
+			</div>
 		</div>
 	</div>
-</div>
 
 <!-- 	<div class="col-md-12">
 		<b>A reccurent neural network to generate rap lyrics. Because why tf not?</b>
@@ -56,40 +56,65 @@
 
 <script type="text/javascript">
 
-var HttpClient = function() {
-    this.get = function(aUrl, aCallback) {
-        var anHttpRequest = new XMLHttpRequest();
-        anHttpRequest.onreadystatechange = function() { 
-            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-                aCallback(anHttpRequest.responseText);
-        }
+	var HttpClient = function() {
+		this.get = function(aUrl, aCallback) {
+			var anHttpRequest = new XMLHttpRequest();
+			anHttpRequest.onreadystatechange = function() { 
+				if (anHttpRequest.readyState == 4)
+					aCallback(anHttpRequest.responseText, anHttpRequest.status);
+			}
 
-        anHttpRequest.open( "GET", aUrl, true );            
-        anHttpRequest.send( null );
-    }
-}
+			anHttpRequest.open( "GET", aUrl, true );            
+			anHttpRequest.send( null );
+		}
+	}
 
-function getLyrics() {
+	var currentJobID = '';
 
-	document.getElementById("lyrics").innerHTML = "<h5>Writing bars...</h5>";
+	function getLyrics() {
 
-	var client = new HttpClient();
+		document.getElementById("lyrics").innerHTML = "<h5>Writing bars...</h5>";
 
-	client.get('/fire', function(response) {
+		var client = new HttpClient();
 
-	    lyricsArr = JSON.parse(response);
-	    lyrics = "<h5>";
+		client.get('/fire', function(response, status) {
+			jobID = response;
+			currentJobID = jobID;
+			console.log(jobID)
 
-		for (var i = 0; i < lyricsArr.length; i++) {
-			lyrics += lyricsArr[i] + "<br />";
-		};
+			queryLyricsProgress(jobID)
+		});
+	}
 
-		lyrics += "</h5>";
+	function queryLyricsProgress(jobID) {
+		var client = new HttpClient();
+		client.get('/progress/' + jobID, function(response, status) {
+			if (response != '') {
+				lyricsArr = response.split('\n')
 
-		document.getElementById("lyrics").innerHTML = lyrics;
+				lyrics = "<h5>";
 
-	});
+				for (var i = 0; i < lyricsArr.length; i++) {
+					lyrics += lyricsArr[i] + "<br />";
+				};
 
-}
+				lyrics += "</h5>";
+
+				document.getElementById("lyrics").innerHTML = lyrics;
+			}
+
+			if(status == 206 && jobID == currentJobID) {
+				queryLyricsProgress(jobID)
+			} else if (jobID != currentJobID) {
+				cancelLyricsJob(jobID)
+			}
+		})
+	}
+
+	function cancelLyricsJob(jobID) {
+		var client = new HttpClient();
+		client.get('/cancel/' + jobID, function(response, status) {
+		})
+	}
 
 </script>

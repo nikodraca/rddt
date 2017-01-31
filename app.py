@@ -24,16 +24,27 @@ def home():
 def fire():
 
 	result = q.enqueue_call(func=get_lyrics, result_ttl=10)
-
-	# result = q.enqueue(
- #             get_lyrics)
-
-	while not result.is_finished:
-		time.sleep(1)
-
-	print (result.result)
 	print (result.id)
-	return result.result
+	return result.id
+
+@app.route('/progress/<job_id>')
+def progress(job_id):
+	job = q.fetch_job(job_id)
+
+	if not job.is_finished:
+		lyrics = job.meta.get('progress')
+		if not lyrics == None:
+			return lyrics, 206
+	else:
+		return job.result, 200
+	return '', 206
+
+@app.route('/cancel/<job_id>')
+def cancel(job_id):
+	job = q.fetch_job(job_id)
+	job.meta['cancelled'] = True
+	job.save()
+	return '', 200
 
 
 if __name__ == "__main__":
