@@ -60,8 +60,8 @@ var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
         var anHttpRequest = new XMLHttpRequest();
         anHttpRequest.onreadystatechange = function() { 
-            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-                aCallback(anHttpRequest.responseText);
+            if (anHttpRequest.readyState == 4)
+                aCallback(anHttpRequest.responseText, anHttpRequest.status);
         }
 
         anHttpRequest.open( "GET", aUrl, true );            
@@ -69,27 +69,52 @@ var HttpClient = function() {
     }
 }
 
+var currentJobID = '';
+
 function getLyrics() {
 
 	document.getElementById("lyrics").innerHTML = "<h5>Writing bars...</h5>";
 
 	var client = new HttpClient();
 
-	client.get('/fire', function(response) {
+	client.get('/fire', function(response, status) {
+		jobID = response;
+		currentJobID = jobID;
+		console.log(jobID)
 
-	    lyricsArr = JSON.parse(response);
+		queryLyricsProgress(jobID)
+	});
+}
+
+function queryLyricsProgress(jobID) {
+	var client = new HttpClient();
+	client.get('/progress/' + jobID, function(response, status) {
+		if (response != '') {
+			lyricsArr = response.split('\n')
+
 	    lyrics = "<h5>";
 
-		for (var i = 0; i < lyricsArr.length; i++) {
-			lyrics += lyricsArr[i] + "<br />";
-		};
+			for (var i = 0; i < lyricsArr.length; i++) {
+				lyrics += lyricsArr[i] + "<br />";
+			};
 
-		lyrics += "</h5>";
+			lyrics += "</h5>";
 
-		document.getElementById("lyrics").innerHTML = lyrics;
+			document.getElementById("lyrics").innerHTML = lyrics;
+		}
 
-	});
+		if(status == 206 && jobID == currentJobID) {
+			queryLyricsProgress(jobID)
+		} else if (jobID != currentJobID) {
+			cancelLyricsJob(jobID)
+		}
+	})
+}
 
+function cancelLyricsJob(jobID) {
+	var client = new HttpClient();
+	client.get('/cancel/' + jobID, function(response, status) {
+	})
 }
 
 </script>

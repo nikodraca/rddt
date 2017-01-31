@@ -12,6 +12,8 @@ import json
 import requests
 
 def get_lyrics():
+	if shouldCancel():
+		return ''
 	model = load_model('my_model.h5')
 	path = "txt/output_all.txt"
 	text = open(path).read().lower()
@@ -44,10 +46,9 @@ def get_lyrics():
 	print('----- Generating with seed: "' + sentence + '"')
 	sys.stdout.write(generated)
 
-	job = get_current_job()
-
-
 	for i in range(400):
+			if shouldCancel():
+				return ''
 			x = np.zeros((1, maxlen, len(chars)))
 			for t, char in enumerate(sentence):
 					x[0, t, char_indices[char]] = 1.
@@ -59,9 +60,17 @@ def get_lyrics():
 			generated += next_char
 			sentence = sentence[1:] + next_char 
 
-			job.meta['progress'] = generated
-			job.save()
-
+			updateProgress(generated)
 	print()	
 
-	return json.dumps(generated.split("\n"))
+	return generated
+
+def updateProgress(progress):
+	job = get_current_job()
+	job.meta['progress'] = progress
+	job.save()
+
+def shouldCancel():
+	job = get_current_job()
+	job.refresh()
+	return job.meta.get('cancelled')
