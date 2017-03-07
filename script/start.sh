@@ -1,11 +1,11 @@
 #start redis server
 redis-server > log/rddt-redis.log &
-echo 'redis-server pid is '
+echo 'KILL TO STOP: redis-server pid is '
 echo $!
 
 #start main app on port 5001
 python app.py > log/rddt-app.log 2>&1 &
-echo 'app.py pid is '
+echo 'KILL TO STOP: app.py pid is '
 echo $!
 
 #start workers
