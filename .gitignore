@@ -1,3 +1,9 @@
+# Ignore redis binary dump (dump.rdb) files
+
+*.rdb
+
+*.pyc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -76,11 +82,14 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+# SageMath parsed files
+*.sage.py
+
 # dotenv
 .env
 
 # virtualenv
-.venv/
+.venv
 venv/
 ENV/
 
@@ -89,3 +98,5 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+.DS_Store
